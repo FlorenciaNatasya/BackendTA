@@ -104,6 +104,8 @@
             selectRestoBerdasarkanHariJamBuka($conn);
         } else if ($func == "CreatePaymentLink"){
             CreatePaymentLink($conn);
+        } else if ($func == "GetMidtransResponseCode"){
+            GetMidtransResponseCode($conn);
         }
     } else {
         $response["code"] = -1;
@@ -148,14 +150,14 @@
     // }
 
     function RegisterCust($conn) {
-        if (isset($_POST["username"]) && isset($_POST["password"]) && isset($_POST["nama"]) && 
-            isset($_POST["email"]) && isset($_POST["status"])) {
+        if (isset($_POST["username"]) && isset($_POST["password"]) && isset($_POST["nama"]) && isset($_POST["email"]) && isset($_POST["telp"]) && isset($_POST["status"])) {
             $username = $_POST["username"];
             $password = $_POST["password"];
             $nama = $_POST["nama"];
             $email = $_POST["email"];
+            $telp = $_POST["telp"];
             $status = $_POST["status"];
-            $sql_insert = "INSERT INTO customer(username_customer, password_customer, nama_customer, email_customer, status_customer) VALUES ('$username', '$password', '$nama', '$email', '$status')";
+            $sql_insert = "INSERT INTO customer(username_customer, password_customer, nama_customer, email_customer, telp_customer, status_customer) VALUES ('$username', '$password', '$nama', '$email', '$telp', '$status')";
             $query = mysqli_query($conn, $sql_insert);
             if ($query) {
                 $response["code"] = 1;
@@ -184,6 +186,7 @@
                 $data["password_customer"] = $row["password_customer"];
                 $data["nama_customer"] = $row["nama_customer"];
                 $data["email_customer"] = $row["email_customer"];
+                $data["telp_customer"] = $row["telp_customer"];
                 $data["status_customer"] = $row["status_customer"];
                 $arrcust[$ctr] = $data;
                 $ctr++;
@@ -315,7 +318,7 @@
     }
 
     function selectAllRestoran($conn){
-        $sql = "SELECT id_restoran, username_restoran, password_restoran, nama_restoran, alamat_restoran, daerah_restoran, email_restoran, status_restoran FROM restoran";
+        $sql = "SELECT id_restoran, username_restoran, password_restoran, nama_restoran, alamat_restoran, daerah_restoran, email_restoran, telp_restoran, status_restoran FROM restoran";
         $result2 = mysqli_query($conn, $sql);
         if (mysqli_num_rows($result2) > 0) {
             $data = array();
@@ -329,6 +332,7 @@
                 $data["alamat_restoran"] = $row["alamat_restoran"];
                 $data["daerah_restoran"] = $row["daerah_restoran"];
                 $data["email_restoran"] = $row["email_restoran"];
+                $data["telp_restoran"] = $row["telp_restoran"];
                 $data["status_restoran"] = $row["status_restoran"];
                 $arrResto[$ctr] = $data;
                 $ctr++;
@@ -345,13 +349,14 @@
     }
 
     function RegisterRestoran($conn){
-        if (isset($_POST["username_restoran"]) && isset($_POST["password_restoran"]) && isset($_POST["nama_restoran"]) && isset($_POST["alamat_restoran"]) && isset($_POST["daerah_restoran"]) && isset($_POST["email_restoran"]) && isset($_POST["image_depan"]) && isset($_POST["image_dalam"]) && isset($_POST["image_ruangan"]) && isset($_POST["image_sertifikat"])) {
+        if (isset($_POST["username_restoran"]) && isset($_POST["password_restoran"]) && isset($_POST["nama_restoran"]) && isset($_POST["alamat_restoran"]) && isset($_POST["daerah_restoran"]) && isset($_POST["email_restoran"]) && isset($_POST["telp_restoran"]) && isset($_POST["image_depan"]) && isset($_POST["image_dalam"]) && isset($_POST["image_ruangan"]) && isset($_POST["image_sertifikat"])) {
             $username = $_POST["username_restoran"];
             $password = $_POST["password_restoran"];
             $nama = $_POST["nama_restoran"];
             $alamat = $_POST["alamat_restoran"];
             $daerah = $_POST["daerah_restoran"];
             $email = $_POST["email_restoran"];
+            $telp = $_POST["telp_restoran"];
             $status = 'Belum Aktif';
             $path = "imagesResto/". str_replace(" ", "", $nama)."BagianDepan".".jpg";
             file_put_contents($path, base64_decode($_POST["image_depan"]));
@@ -361,7 +366,7 @@
             file_put_contents($path3, base64_decode($_POST["image_ruangan"]));
             $path4 = "imagesResto/". str_replace(" ", "", $nama)."Sertifikat".".jpg";
             file_put_contents($path4, base64_decode($_POST["image_sertifikat"]));
-            $sql_insert = "INSERT INTO restoran(username_restoran, password_restoran, nama_restoran, alamat_restoran, daerah_restoran, email_restoran, status_restoran) VALUES ('$username', '$password', '$nama', '$alamat', '$daerah', '$email', '$status')";
+            $sql_insert = "INSERT INTO restoran(username_restoran, password_restoran, nama_restoran, alamat_restoran, daerah_restoran, email_restoran, telp_restoran, status_restoran) VALUES ('$username', '$password', '$nama', '$alamat', '$daerah', '$email', '$telp', '$status')";
             $query = mysqli_query($conn, $sql_insert);
             if ($query) {
                 $response["code"] = 1;
@@ -1468,4 +1473,57 @@
             $response["message"] = json_decode($server_output, true)['payment_url'];
         }
         echo json_encode($response);
+    }
+
+    function GetMidtransResponseCode($conn){
+        if(isset($_POST["order_id"])){
+            $q = base64_encode("SB-Mid-server-4qyA_1VhziYrr7oG4uiUHWGt".":");
+            // $vars = [
+            //     'transaction_status' => [
+            //         'order_id' => $_POST["order_id"]
+            //     ],
+            // ];
+            // $ch = curl_init();
+            // curl_setopt($ch, CURLOPT_URL,"https://api.sandbox.midtrans.com/v2/".$_POST["order_id"]."/status");
+            // curl_setopt($ch, CURLOPT_POST, 1);
+            // // curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode($vars));  //Post Fields
+            // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            // $headers = [
+            //     'Accept: application/json',
+            //     'Content-Type: application/json',
+            //     'Authorization: Basic ' . $q
+            // ];
+            // curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            // $server_output = curl_exec ($ch);
+            // curl_close ($ch);
+            // // print_r(json_decode($server_output, true)['payment_url']);
+            // $response["message"] = json_decode($server_output, true)['status_code'];
+
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+            CURLOPT_URL => "https://api.sandbox.midtrans.com/v2/".$_POST["order_id"]."/status",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_HTTPHEADER => [
+                "accept: application/json",
+                'Content-Type: application/json',
+                'Authorization: Basic ' . $q
+            ],
+            ]);
+
+            $response = curl_exec($curl);
+            // $err = curl_error($curl);
+
+            curl_close($curl);
+            // if ($err) {
+            // echo "cURL Error #:" . $err;
+            // } else {
+                $responsee["message"] = json_decode($response, true)['status_code'];
+            // }
+        }
+        echo json_encode($responsee);
     }
